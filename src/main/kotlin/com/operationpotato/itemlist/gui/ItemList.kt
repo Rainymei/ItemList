@@ -24,6 +24,7 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 
 	var layout: PaginatedGridLayout = PaginatedGridLayout(0, 0)
 	var itemScale: Float = 1f
+	var scrollAmountWidget: TemporalTextWidget? = null
 
 	var visibleCols: Int = 0
 	var visibleRows: Int = 0
@@ -90,8 +91,12 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 	}
 
 	fun scrollItemSize(scrollY: Double) {
-		itemScale += scrollY.toFloat() / 50
+		itemScale += scrollY.toFloat() / 25
 		itemScale = itemScale.coerceIn(1f, 3f)
+		scrollAmountWidget = TemporalTextWidget(
+			x + width / 2, itemListHeight / 2, 5f,
+			Component.literal("${(itemScale * 100).toInt()}%"), McFont.self
+		)
 		ThreadUtils.SORTING_EXECUTOR.execute(::updatePositions)
 	}
 
@@ -125,6 +130,8 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 		layout.visitPageWidgets {
 			it.extractRenderState(graphics, mouseX, mouseY, a)
 		}
+		scrollAmountWidget?.extractRenderState(graphics, mouseX, mouseY, a)
+		if (scrollAmountWidget?.expired() == true) scrollAmountWidget = null
 		graphics.disableScissor()
 	}
 
