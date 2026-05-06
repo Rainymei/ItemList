@@ -8,19 +8,22 @@ import net.minecraft.client.gui.components.events.GuiEventListener
 import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.network.chat.Component
 import net.minecraft.util.CommonColors
+import tech.thatgravyboat.skyblockapi.helpers.McClient
 import tech.thatgravyboat.skyblockapi.helpers.McFont
 import tech.thatgravyboat.skyblockapi.utils.lazy.registryBoundLazy
+import kotlin.math.roundToInt
 
 class ItemList(x: Int, y: Int, width: Int, height: Int) :
 	AbstractContainerWidget(
 		x + PADDING, y, width, height,
-		Component.empty(), defaultSettings(4)
+		Component.empty(), defaultSettings(8)
 	) {
 
 	val itemListHeight: Int
 		get() = height - 2 * PADDING - 2 * McFont.height
 
-	var layout: PaginatedGridLayout = PaginatedGridLayout(x, y)
+	var layout: PaginatedGridLayout = PaginatedGridLayout(0, 0)
+	var itemScale: Float = 1f
 
 	var visibleCols: Int = 0
 	var visibleRows: Int = 0
@@ -37,9 +40,12 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 		val previouslyVisibleCols = visibleCols
 		val previouslyVisibleRows = visibleRows
 		val adjustedWidth = width - PADDING
-		visibleCols = Math.floorDiv(adjustedWidth, StackDisplay.STACK_WIDTH)
-		horizontalPadding = (adjustedWidth - visibleCols * StackDisplay.STACK_WIDTH) / 2
-		visibleRows = itemListHeight / StackDisplay.STACK_HEIGHT
+
+		val scaledWidth = (StackDisplay.STACK_WIDTH * itemScale).roundToInt()
+		val scaledHeight = (StackDisplay.STACK_WIDTH * itemScale).roundToInt()
+		visibleCols = Math.floorDiv(adjustedWidth, scaledWidth)
+		horizontalPadding = (adjustedWidth - visibleCols * scaledWidth) / 2
+		visibleRows = itemListHeight / scaledHeight
 		if (visibleCols != previouslyVisibleCols || visibleRows != previouslyVisibleRows) {
 			positionDisplays(visibleCols - 1, visibleRows)
 		}
@@ -49,6 +55,7 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 	// Off-Thread
 	fun positionDisplays(maxCols: Int, maxRows: Int) {
 		val newLayout = PaginatedGridLayout(x + horizontalPadding, y + PADDING + McFont.height / 2)
+		children.forEach { it.scale(itemScale) }
 		newLayout.addChildren(children, maxCols, maxRows)
 		layout = newLayout
 		maxPages = layout.pages
@@ -66,14 +73,8 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 
 	override fun children(): List<GuiEventListener> = children
 
-	override fun mouseScrolled(
-		x: Double,
-		y: Double,
-		scrollX: Double,
-		scrollY: Double
-	): Boolean {
-		if (!visible) return false
-		if (scrollY < 0) {
+	fun scrollPage(scrollDown: Boolean) {
+		if (scrollDown) {
 			currentPage += 1
 			if (currentPage > maxPages) {
 				currentPage -= maxPages
@@ -86,6 +87,27 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 		}
 		currentPage = currentPage.coerceIn(1, maxPages)
 		ThreadUtils.SORTING_EXECUTOR.execute(::updatePositions)
+	}
+
+	fun scrollItemSize(scrollY: Double) {
+		itemScale += scrollY.toFloat() / 50
+		itemScale = itemScale.coerceIn(1f, 3f)
+		ThreadUtils.SORTING_EXECUTOR.execute(::updatePositions)
+	}
+
+	override fun mouseScrolled(
+		x: Double,
+		y: Double,
+		scrollX: Double,
+		scrollY: Double
+	): Boolean {
+		if (!visible) return false
+		if (!this.isMouseOver(x, y)) return false
+		if (McClient.self.hasControlDown()) {
+			scrollItemSize(scrollY)
+		} else {
+			scrollPage(scrollY < 0)
+		}
 		return true
 	}
 

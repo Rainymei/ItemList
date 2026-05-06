@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.network.chat.Component
+import net.minecraft.util.CommonColors
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.TooltipFlag
@@ -11,11 +12,16 @@ import tech.thatgravyboat.skyblockapi.api.repo.LazyItemStack
 import tech.thatgravyboat.skyblockapi.helpers.McClient
 import tech.thatgravyboat.skyblockapi.helpers.McLevel
 import tech.thatgravyboat.skyblockapi.helpers.McPlayer
+import tech.thatgravyboat.skyblockapi.platform.pushPop
+import tech.thatgravyboat.skyblockapi.platform.scale
+import tech.thatgravyboat.skyblockapi.platform.translate
+import kotlin.math.roundToInt
 
 class StackDisplay(val lazyStack: LazyItemStack) :
 	AbstractWidget(0, 0, STACK_WIDTH, STACK_HEIGHT, Component.empty()) {
 
 	var stack: ItemStack = ItemStack.EMPTY
+	var scale: Float = 1f
 
 	fun getTooltipLines(): List<Component> {
 		val tooltipStyle = if (McClient.options.advancedItemTooltips) {
@@ -33,17 +39,26 @@ class StackDisplay(val lazyStack: LazyItemStack) :
 		a: Float
 	) {
 		if (stack.isEmpty) stack = lazyStack.create()
-		graphics.fakeItem(stack, x, y)
+		graphics.pushPop {
+			graphics.translate(x, y)
+			graphics.scale(scale, scale)
+			graphics.fakeItem(stack, 0, 0)
+		}
 
 		if (isHovered) {
 			graphics.setComponentTooltipForNextFrame(McClient.gui.font, getTooltipLines(), x, y)
 		}
 	}
 
+	fun scale(scale: Float) {
+		setSize((STACK_WIDTH * scale).roundToInt(), (STACK_HEIGHT * scale).roundToInt())
+		this.scale = scale
+	}
+
 	override fun updateWidgetNarration(output: NarrationElementOutput) {}
 
 	companion object {
-		const val STACK_WIDTH = 18
-		const val STACK_HEIGHT = 18
+		const val STACK_WIDTH = 16
+		const val STACK_HEIGHT = 16
 	}
 }
