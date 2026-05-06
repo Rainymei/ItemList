@@ -13,19 +13,20 @@ import tech.thatgravyboat.skyblockapi.utils.lazy.registryBoundLazy
 
 class ItemList(x: Int, y: Int, width: Int, height: Int) :
 	AbstractContainerWidget(
-		x, y + PADDING, width, height,
+		x + PADDING, y, width, height,
 		Component.empty(), defaultSettings(4)
 	) {
 
 	val itemListHeight: Int
-		get() = height - 3 * PADDING
+		get() = height - 2 * PADDING - 2 * McFont.height
 
 	var layout: PaginatedGridLayout = PaginatedGridLayout(x, y)
 
 	var visibleCols: Int = 0
 	var visibleRows: Int = 0
+	var horizontalPadding: Int = 0
 	var currentPage: Int = 1
-	var maxPages: Int = 0
+	var maxPages: Int = 1
 
 	init {
 		ThreadUtils.SORTING_EXECUTOR.execute(::updatePositions)
@@ -35,17 +36,19 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 	fun updatePositions() {
 		val previouslyVisibleCols = visibleCols
 		val previouslyVisibleRows = visibleRows
-		visibleCols = width / StackDisplay.STACK_WIDTH
+		val adjustedWidth = width - PADDING
+		visibleCols = Math.floorDiv(adjustedWidth, StackDisplay.STACK_WIDTH)
+		horizontalPadding = (adjustedWidth - visibleCols * StackDisplay.STACK_WIDTH) / 2
 		visibleRows = itemListHeight / StackDisplay.STACK_HEIGHT
 		if (visibleCols != previouslyVisibleCols || visibleRows != previouslyVisibleRows) {
-			positionDisplays(visibleCols, visibleRows)
+			positionDisplays(visibleCols - 1, visibleRows)
 		}
 		layout.switchPage(currentPage - 1)
 	}
 
 	// Off-Thread
 	fun positionDisplays(maxCols: Int, maxRows: Int) {
-		val newLayout = PaginatedGridLayout(x, y)
+		val newLayout = PaginatedGridLayout(x + horizontalPadding, y + PADDING + McFont.height / 2)
 		newLayout.addChildren(children, maxCols, maxRows)
 		layout = newLayout
 		maxPages = layout.pages
@@ -94,7 +97,7 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 	) {
 		graphics.centeredText(
 			McFont.self, Component.literal("${currentPage}/${maxPages}"),
-			x + width / 2, McFont.height, CommonColors.WHITE
+			x + width / 2, y + McFont.height, CommonColors.WHITE
 		)
 		graphics.enableScissor(x, y, x + width, y + height)
 		layout.visitPageWidgets {
