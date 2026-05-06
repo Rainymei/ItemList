@@ -1,6 +1,6 @@
 package com.operationpotato.itemlist
 
-import com.operationpotato.itemlist.gui.ItemList
+import com.operationpotato.itemlist.gui.EntireListWidget
 import net.fabricmc.api.ClientModInitializer
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents
@@ -22,7 +22,7 @@ object SkyBlockItemList : ClientModInitializer {
 			if (screen is AbstractContainerScreen<*>) {
 				if (screen is InventoryScreen && mc.player?.hasInfiniteMaterials() ?: false) return@register
 				val width = w - screen.right
-				val itemList = ItemList(screen.right, 0, width, h)
+				val itemList = EntireListWidget(screen.right, 0, width, h)
 
 				Screens.getWidgets(screen).add(itemList)
 				ScreenMouseEvents.allowMouseScroll(screen).register { _, x, y, scrollX, scrollY ->

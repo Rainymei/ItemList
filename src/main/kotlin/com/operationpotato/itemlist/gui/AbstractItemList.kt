@@ -1,6 +1,5 @@
 package com.operationpotato.itemlist.gui
 
-import com.operationpotato.itemlist.utils.SkyBlockItems
 import com.operationpotato.itemlist.utils.ThreadUtils
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.AbstractContainerWidget
@@ -10,10 +9,9 @@ import net.minecraft.network.chat.Component
 import net.minecraft.util.CommonColors
 import tech.thatgravyboat.skyblockapi.helpers.McClient
 import tech.thatgravyboat.skyblockapi.helpers.McFont
-import tech.thatgravyboat.skyblockapi.utils.lazy.registryBoundLazy
 import kotlin.math.roundToInt
 
-class ItemList(x: Int, y: Int, width: Int, height: Int) :
+abstract class AbstractItemList(x: Int, y: Int, width: Int, height: Int) :
 	AbstractContainerWidget(
 		x + PADDING, y, width, height,
 		Component.empty(), defaultSettings(8)
@@ -36,6 +34,8 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 		ThreadUtils.SORTING_EXECUTOR.execute(::updatePositions)
 	}
 
+	abstract fun getItems(): List<StackDisplay>
+
 	// Off-Thread
 	fun updatePositions() {
 		val previouslyVisibleCols = visibleCols
@@ -55,8 +55,8 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 	// Off-Thread
 	fun positionDisplays(maxCols: Int, maxRows: Int) {
 		val newLayout = PaginatedGridLayout(x + horizontalPadding, y + PADDING + McFont.height / 2)
-		children.forEach { it.scale(itemScale) }
-		newLayout.addChildren(children, maxCols, maxRows)
+		getItems().forEach { it.scale(itemScale) }
+		newLayout.addChildren(getItems(), maxCols, maxRows)
 		layout = newLayout
 		maxPages = layout.pages
 		currentPage = currentPage.coerceIn(1, maxPages)
@@ -71,7 +71,7 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 		return width
 	}
 
-	override fun children(): List<GuiEventListener> = children
+	override fun children(): List<GuiEventListener> = getItems()
 
 	fun scrollPage(scrollDown: Boolean) {
 		if (scrollDown) {
@@ -138,17 +138,5 @@ class ItemList(x: Int, y: Int, width: Int, height: Int) :
 
 	companion object {
 		private const val PADDING = StackDisplay.STACK_SIZE
-		private val children: List<StackDisplay> by registryBoundLazy { getItems() }
-
-		fun getItems(): List<StackDisplay> {
-			val displays: MutableList<StackDisplay> = mutableListOf()
-
-			SkyBlockItems.items.forEach { stack ->
-				val display = StackDisplay(stack)
-				displays.add(display)
-			}
-
-			return displays
-		}
 	}
 }
