@@ -33,7 +33,7 @@ class StackDisplay(val lazyStack: LazyItemStack) :
 		a: Float
 	) {
 		if (stack.isEmpty) stack = lazyStack.create()
-		graphics.item(stack, x, y)
+		graphics.fakeItem(stack, x, y)
 
 		if (isHovered) {
 			graphics.setComponentTooltipForNextFrame(McClient.gui.font, getTooltipLines(), x, y)
