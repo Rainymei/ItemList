@@ -2,3 +2,6 @@ root = true
 
 [*]
 indent_style = tab
+
+[*.kt]
+ij_kotlin_name_count_to_use_star_import = 999

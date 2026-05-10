@@ -2,7 +2,11 @@ package com.operationpotato.itemlist.gui
 
 import com.operationpotato.itemlist.api.impl.PluginManager
 import net.minecraft.client.gui.components.AbstractWidget
-import net.minecraft.client.gui.layouts.*
+import net.minecraft.client.gui.layouts.GridLayout
+import net.minecraft.client.gui.layouts.Layout
+import net.minecraft.client.gui.layouts.LayoutElement
+import net.minecraft.client.gui.layouts.LayoutSettings
+import net.minecraft.client.gui.layouts.SpacerElement
 import net.minecraft.client.gui.navigation.ScreenRectangle
 import java.util.function.Consumer
 
