@@ -2,16 +2,25 @@ package com.operationpotato.itemlist.utils
 
 import tech.thatgravyboat.repolib.api.RepoAPI
 import tech.thatgravyboat.skyblockapi.api.repo.LazyItemStack
+import tech.thatgravyboat.skyblockapi.api.repo.apis.SkyBlockAttributesRepo
+import tech.thatgravyboat.skyblockapi.api.repo.apis.SkyBlockEnchantmentsRepo
 import tech.thatgravyboat.skyblockapi.api.repo.apis.SkyBlockItemsRepo
+import tech.thatgravyboat.skyblockapi.api.repo.apis.SkyBlockRunesRepo
 import tech.thatgravyboat.skyblockapi.utils.lazy.registryBoundLazy
 
 object SkyBlockItems {
-	val itemNames by registryBoundLazy { getAllItemNames() }
 	val items by registryBoundLazy { getAllItems() }
 
-	val numeralPattern = Regex("[_;]([0-9]+)$")
+	private val attributeNames by registryBoundLazy { getAllAttributeNames() }
+	private val enchantNames by registryBoundLazy { getAllEnchantmentNames() }
+	private val itemNames by registryBoundLazy { getAllItemNames() }
+	private val runeNames by registryBoundLazy { getAllRuneNames() }
 
-	fun sortByNameAndNumber(a: String, b: String): Int {
+	private val numeralPattern = Regex("[_;]([0-9]+)$")
+
+	private fun sortByIdAndNumber(aItem: Item, bItem: Item): Int {
+		val a = aItem.id
+		val b = bItem.id
 		val aMatch = numeralPattern.find(a)
 		val bMatch = numeralPattern.find(b)
 		if (aMatch != null && bMatch != null) {
@@ -27,19 +36,57 @@ object SkyBlockItems {
 		return a.compareTo(b)
 	}
 
-	fun getAllItemNames(): List<String> {
-		return RepoAPI.items().items().keys.sortedWith(::sortByNameAndNumber)
+	private fun getAllAttributeNames(): List<String> {
+		return RepoAPI.attributes().attributes().keys.toList()
 	}
 
-	fun getAllItems(): List<LazyItemStack> {
+	private fun getAllEnchantmentNames(): List<SkyBlockEnchantmentsRepo.Query> {
+		return RepoAPI.enchantments().enchantments().map { (_, v) ->
+			v.levels.map { x -> SkyBlockEnchantmentsRepo.Query(id = v.id, level = x.key) }
+		}.flatten()
+	}
+
+	private fun getAllItemNames(): List<String> {
+		return RepoAPI.items().items().keys.toList()
+	}
+
+	private fun getAllRuneNames(): List<SkyBlockRunesRepo.Query> {
+		return RepoAPI.runes().runes().map { (_, v) ->
+			v.map { x -> SkyBlockRunesRepo.Query(id = x.id, tier = x.tier) }
+		}.flatten()
+	}
+
+	private fun getAllItems(): List<Item> {
 		if (!RepoAPI.isInitialized()) return listOf()
-		val allItems: MutableList<LazyItemStack> = mutableListOf()
+		val allItems: MutableList<Item> = mutableListOf()
+
+		attributeNames.forEach { key ->
+			val stack = SkyBlockAttributesRepo.getLazyItemStack(key) ?: return@forEach
+			allItems.add(Item(stack, SkyBlockItemCategory.ATTRIBUTE, key))
+		}
+
+		enchantNames.forEach { key ->
+			val stack = SkyBlockEnchantmentsRepo.getLazyItemStack(key) ?: return@forEach
+			val id = key.id.replace(Regex("^ULTIMATE_"), "")
+			allItems.add(Item(stack, SkyBlockItemCategory.ENCHANTMENT, "$id;${key.level}"))
+		}
 
 		itemNames.forEach { key ->
 			val stack = SkyBlockItemsRepo.getLazyItemStack(key) ?: return@forEach
-			allItems.add(stack)
+			allItems.add(Item(stack, SkyBlockItemCategory.ITEM, key))
 		}
 
-		return allItems
+		runeNames.forEach { key ->
+			val stack = SkyBlockRunesRepo.getLazyItemStack(key) ?: return@forEach
+			allItems.add(Item(stack, SkyBlockItemCategory.RUNE, "${key.id};${key.id}"))
+		}
+
+		return allItems.sortedWith(::sortByIdAndNumber)
 	}
+
+	data class Item(
+		val stack: LazyItemStack,
+		val category: SkyBlockItemCategory,
+		val id: String
+	)
 }

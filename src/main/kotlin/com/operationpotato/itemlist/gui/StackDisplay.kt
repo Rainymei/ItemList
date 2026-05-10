@@ -1,5 +1,6 @@
 package com.operationpotato.itemlist.gui
 
+import com.operationpotato.itemlist.utils.SkyBlockItemCategory
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.narration.NarrationElementOutput
@@ -18,7 +19,7 @@ import tech.thatgravyboat.skyblockapi.platform.scale
 import tech.thatgravyboat.skyblockapi.platform.translate
 import kotlin.math.roundToInt
 
-class StackDisplay(val lazyStack: LazyItemStack) :
+class StackDisplay(val lazyStack: LazyItemStack, val type: SkyBlockItemCategory) :
 	AbstractWidget(0, 0, STACK_SIZE, STACK_SIZE, Component.empty()) {
 
 	var stack: ItemStack = ItemStack.EMPTY

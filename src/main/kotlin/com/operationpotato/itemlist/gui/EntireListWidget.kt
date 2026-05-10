@@ -14,8 +14,8 @@ class EntireListWidget(x: Int, y: Int, width: Int, height: Int) : AbstractItemLi
 		fun getItems(): List<StackDisplay> {
 			val displays: MutableList<StackDisplay> = mutableListOf()
 
-			SkyBlockItems.items.forEach { stack ->
-				val display = StackDisplay(stack)
+			SkyBlockItems.items.forEach { (stack, category) ->
+				val display = StackDisplay(stack, category)
 				displays.add(display)
 			}
 
