@@ -46,6 +46,8 @@ class PaginatedGridLayout(private var x: Int, private var y: Int) : Layout {
 		var col = 0
 		var row = 0
 		val excludedAreas = calcExcludedAreas(x, y, maxCols, maxRows, itemSize)
+		// don't bother if >50% of the screen is excluded
+		if (excludedAreas.size > (maxCols * maxRows * 0.5)) return
 		children.forEach { display ->
 			if (excludedAreas.contains(Pair(col, row))) {
 				layout.addChild(SpacerElement(itemSize, itemSize), row, col)
