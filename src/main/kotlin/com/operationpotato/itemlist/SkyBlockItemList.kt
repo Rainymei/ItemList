@@ -7,17 +7,21 @@ import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents
 import net.fabricmc.fabric.api.client.screen.v1.Screens
+import net.fabricmc.fabric.api.event.Event
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.client.gui.screens.inventory.InventoryScreen
+import net.minecraft.resources.Identifier
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
 import tech.thatgravyboat.skyblockapi.utils.extentions.right
 
 object SkyBlockItemList : ClientModInitializer {
+	val latePhase = Identifier.fromNamespaceAndPath("skyblock-item-list", "late")
 
 	override fun onInitializeClient() {
-		ScreenEvents.AFTER_INIT.register(::addItemListWidget)
+		ScreenEvents.AFTER_INIT.addPhaseOrdering(Event.DEFAULT_PHASE, latePhase)
+		ScreenEvents.AFTER_INIT.register(latePhase, ::addItemListWidget)
 	}
 
 	fun addItemListWidget(mc: Minecraft, screen: Screen, w: Int, h: Int) {
@@ -28,14 +32,20 @@ object SkyBlockItemList : ClientModInitializer {
 			val itemList = EntireListWidget(screen.right, 0, width, h)
 
 			Screens.getWidgets(screen).add(itemList)
-			ScreenMouseEvents.allowMouseScroll(screen).register { _, x, y, scrollX, scrollY ->
+			val mouseScroll = ScreenMouseEvents.allowMouseScroll(screen)
+			mouseScroll.addPhaseOrdering(Event.DEFAULT_PHASE, latePhase)
+			mouseScroll.register(latePhase) { _, x, y, scrollX, scrollY ->
 				itemList.mouseScrolled(x, y, scrollX, scrollY)
 			}
-			ScreenKeyboardEvents.allowKeyPress(screen).register { _, event ->
+			val keyPress = ScreenKeyboardEvents.allowKeyPress(screen)
+			keyPress.addPhaseOrdering(Event.DEFAULT_PHASE, latePhase)
+			keyPress.register(latePhase) { _, event ->
 				itemList.keyPressed(event)
 				return@register true
 			}
-			ScreenEvents.beforeExtract(screen).register { _, _, _, _, _ ->
+			val beforeExtract = ScreenEvents.beforeExtract(screen)
+			beforeExtract.addPhaseOrdering(Event.DEFAULT_PHASE, latePhase)
+			beforeExtract.register(latePhase) { _, _, _, _, _ ->
 				PluginManager.refreshExclusionZones()
 			}
 		}
