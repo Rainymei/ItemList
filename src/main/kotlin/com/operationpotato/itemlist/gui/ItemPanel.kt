@@ -1,16 +1,21 @@
 package com.operationpotato.itemlist.gui
 
+import com.operationpotato.itemlist.utils.SkyBlockItemCategory
+import com.operationpotato.itemlist.utils.ComponentUtils
+import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.AbstractContainerWidget
 import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.components.Button
+import net.minecraft.client.gui.components.CycleButton
+import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.client.gui.components.events.GuiEventListener
 import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.client.gui.screens.inventory.PageButton
 import net.minecraft.network.chat.Component
 
-class ItemPanel(x: Int, y: Int, width: Int, height: Int, val itemListWidget: AbstractItemList) :
+class ItemPanel(x: Int, y: Int, width: Int, height: Int, val itemListWidget: EntireListWidget) :
 	AbstractContainerWidget(x, y, width, height, Component.empty(), defaultSettings(0)) {
 
 	val prevPageButton: Button = PageButton(x + 23, y + 5, false, { _ ->
@@ -21,13 +26,41 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int, val itemListWidget: Abs
 		itemListWidget.scrollPage(true)
 		playButtonClickSound(Minecraft.getInstance().soundManager)
 	}, false)
-	val children: List<AbstractWidget> = listOf(nextPageButton, prevPageButton, itemListWidget)
+	val filterButton: CycleButton<SkyBlockItemCategory> =
+		CycleButton.builder(SkyBlockItemCategory::asComponent, SkyBlockItemCategory.ALL)
+			.withValues(SkyBlockItemCategory.entries)
+			.withTooltip(::createFilterTooltip)
+			.create(
+				x + width - AbstractItemList.PADDING - 7, y + height - 20,
+				16, 16, Component.empty(), ::onFilterButtonClick
+			)
+	val children: List<AbstractWidget> = listOf(nextPageButton, prevPageButton, filterButton, itemListWidget)
 
 	init {
 		itemListWidget.x = x + AbstractItemList.PADDING
 		itemListWidget.y = y
 		itemListWidget.width = width
 		itemListWidget.height = height
+		filterButton.message = Component.literal("F")
+	}
+
+	fun createFilterTooltip(category: SkyBlockItemCategory): Tooltip {
+		val options = ComponentUtils.getCycleEnumOptions(category)
+		var line = Component.empty().append(category.asComponent().withStyle(ChatFormatting.GREEN))
+		line = line.append(ComponentUtils.joinComponents(options))
+		return Tooltip.create(line, null)
+	}
+
+	fun onFilterButtonClick(btn: CycleButton<SkyBlockItemCategory>, category: SkyBlockItemCategory) {
+		val color = if (category == SkyBlockItemCategory.ALL) {
+			ChatFormatting.WHITE
+		} else {
+			ChatFormatting.GREEN
+		}
+		btn.message = Component.literal("F").withStyle(color)
+		itemListWidget.filterChildren(category)
+		itemListWidget.switchPage(0)
+		itemListWidget.updatePositions()
 	}
 
 	override fun children(): List<GuiEventListener> {

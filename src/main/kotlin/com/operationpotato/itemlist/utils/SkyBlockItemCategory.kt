@@ -1,12 +1,19 @@
 package com.operationpotato.itemlist.utils
 
-enum class SkyBlockItemCategory {
-	ATTRIBUTE,
-	ENCHANTMENT,
-	ITEM,
-	PET,
-	POTION,
-	RUNE,
-	NONE,
+import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.MutableComponent
+
+enum class SkyBlockItemCategory(val formattedName: String) {
+	ATTRIBUTE("Attributes"),
+	ENCHANTMENT("Enchants"),
+	ITEM("Items"),
+	PET("Pets"),
+	POTION("Potions"),
+	RUNE("Runes"),
+	ALL("All"),
 	;
+
+	fun asComponent(): MutableComponent {
+		return Component.literal(this.formattedName)
+	}
 }

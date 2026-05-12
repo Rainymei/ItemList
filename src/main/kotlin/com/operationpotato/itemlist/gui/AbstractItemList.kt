@@ -22,6 +22,7 @@ abstract class AbstractItemList(width: Int, height: Int) :
 
 	var layout: PaginatedGridLayout = PaginatedGridLayout(0, 0)
 	var itemScale: Float = 1f
+	var itemCount: Int = 0
 	var scrollAmountWidget: TemporalTextWidget? = null
 
 	var visibleCols: Int = 0
@@ -40,18 +41,26 @@ abstract class AbstractItemList(width: Int, height: Int) :
 		ThreadUtils.SORTING_EXECUTOR.execute(::updatePositions)
 	}
 
+	fun switchPage(page: Int) {
+		layout.switchPage(page)
+		currentPage = layout.activePage
+	}
+
 	// Off-Thread
 	fun updatePositions() {
 		val previouslyVisibleCols = visibleCols
 		val previouslyVisibleRows = visibleRows
+		val prevItemCount = itemCount
 		val adjustedWidth = width - PADDING
 
 		val scaledSize = (StackDisplay.STACK_SIZE * itemScale).roundToInt()
 		visibleCols = Math.floorDiv(adjustedWidth, scaledSize)
 		horizontalPadding = (adjustedWidth - visibleCols * scaledSize) / 2
 		visibleRows = itemListHeight / scaledSize
+		itemCount = getItems().size
 		if ((PluginManager.didExclusionZonesChange() && layout.compareExcludedAreas()) ||
-			visibleCols != previouslyVisibleCols || visibleRows != previouslyVisibleRows
+			visibleCols != previouslyVisibleCols || visibleRows != previouslyVisibleRows ||
+			itemCount != prevItemCount
 		) {
 			positionDisplays(visibleCols - 1, visibleRows, scaledSize)
 		}
