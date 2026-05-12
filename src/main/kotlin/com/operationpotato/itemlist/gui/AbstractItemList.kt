@@ -74,7 +74,7 @@ abstract class AbstractItemList(width: Int, height: Int) :
 		newLayout.addChildren(getItems(), maxCols, maxRows, scaledSize)
 		layout = newLayout
 		maxPages = layout.pages
-		currentPage = currentPage.coerceIn(1, maxPages)
+		currentPage = if (maxPages == 0) 0 else currentPage.coerceIn(1, maxPages)
 	}
 
 	override fun setPosition(x: Int, y: Int) {
