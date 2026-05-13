@@ -3,6 +3,7 @@ package com.operationpotato.itemlist.gui
 import com.operationpotato.itemlist.utils.ComponentUtils
 import com.operationpotato.itemlist.utils.SkyBlockItemCategory
 import com.operationpotato.itemlist.utils.ThreadUtils
+import com.operationpotato.itemlist.utils.ThreadUtils.cancelAndSubmit
 import net.minecraft.ChatFormatting
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiGraphicsExtractor
@@ -66,9 +67,7 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int, val itemListWidget: Ent
 	}
 
 	fun filterAsync(category: SkyBlockItemCategory) {
-		val future = filterFuture
-		if (future != null && !future.isDone) future.cancel(true)
-		filterFuture = ThreadUtils.SORTING_EXECUTOR.submit {
+		ThreadUtils.SORTING_EXECUTOR.cancelAndSubmit(filterFuture) {
 			itemListWidget.filterChildren(category)
 			itemListWidget.switchPage(0)
 			itemListWidget.updatePositionsAsync()

@@ -2,6 +2,7 @@ package com.operationpotato.itemlist.gui
 
 import com.operationpotato.itemlist.api.impl.PluginManager
 import com.operationpotato.itemlist.utils.ThreadUtils
+import com.operationpotato.itemlist.utils.ThreadUtils.cancelAndSubmit
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.AbstractContainerWidget
 import net.minecraft.client.gui.components.events.GuiEventListener
@@ -41,9 +42,7 @@ abstract class AbstractItemList(width: Int, height: Int) :
 	abstract fun getItems(): List<StackDisplay>
 
 	fun updatePositionsAsync() {
-		val future = sortingFuture
-		if (future != null && !future.isDone) future.cancel(true)
-		sortingFuture = ThreadUtils.SORTING_EXECUTOR.submit(::updatePositions)
+		sortingFuture = ThreadUtils.SORTING_EXECUTOR.cancelAndSubmit(sortingFuture, ::updatePositions)
 	}
 
 	fun switchPage(page: Int) {
