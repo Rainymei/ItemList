@@ -105,7 +105,7 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) :
 	}
 
 	fun filterAsync(category: SkyBlockItemCategory) {
-		ThreadUtils.SORTING_EXECUTOR.cancelAndSubmit(filterFuture) {
+		this.filterFuture = ThreadUtils.SORTING_EXECUTOR.cancelAndSubmit(filterFuture) {
 			itemListWidget.filterChildren(category)
 			itemListWidget.switchPage(0)
 			itemListWidget.updatePositionsAsync()
