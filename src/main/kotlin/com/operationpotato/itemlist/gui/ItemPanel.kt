@@ -14,6 +14,8 @@ import net.minecraft.client.gui.components.CycleButton
 import net.minecraft.client.gui.components.EditBox
 import net.minecraft.client.gui.components.Tooltip
 import net.minecraft.client.gui.components.events.GuiEventListener
+import net.minecraft.client.gui.layouts.LinearLayout
+import net.minecraft.client.gui.layouts.SpacerElement
 import net.minecraft.client.gui.narration.NarrationElementOutput
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.gui.screens.inventory.PageButton
@@ -21,20 +23,23 @@ import net.minecraft.client.input.KeyEvent
 import net.minecraft.network.chat.Component
 import net.minecraft.util.ARGB
 import net.minecraft.util.CommonColors
+import tech.thatgravyboat.skyblockapi.helpers.McClient
 import tech.thatgravyboat.skyblockapi.helpers.McFont
 import java.util.concurrent.Future
 
 class ItemPanel(x: Int, y: Int, width: Int, height: Int, val itemListWidget: EntireListWidget) :
 	AbstractContainerWidget(x, y, width, height, Component.empty(), defaultSettings(0)) {
 
-	val prevPageButton: Button = PageButton(x + 23, y + 5, false, { _ ->
+	val prevPageButton: Button = PageButton(0, 0, false, { _ ->
 		itemListWidget.scrollPage(false)
 		playButtonClickSound(Minecraft.getInstance().soundManager)
 	}, false)
-	val nextPageButton: Button = PageButton(x + width - AbstractItemList.PADDING - 15, y + 5, true, { _ ->
+	val nextPageButton: Button = PageButton(0, 0, true, { _ ->
 		itemListWidget.scrollPage(true)
 		playButtonClickSound(Minecraft.getInstance().soundManager)
 	}, false)
+	var topLayout: LinearLayout = LinearLayout.horizontal()
+
 	val filterButton: CycleButton<SkyBlockItemCategory> =
 		CycleButton.builder(SkyBlockItemCategory::asComponent, SkyBlockItemCategory.ALL)
 			.withValues(SkyBlockItemCategory.entries)
@@ -48,19 +53,35 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int, val itemListWidget: Ent
 		width - 44, 16,
 		Component.empty()
 	)
+
 	val children: List<AbstractWidget> = listOf(nextPageButton, prevPageButton, filterButton, searchBox, itemListWidget)
 
 	var filterFuture: Future<*>? = null
 	var searchFuture: Future<*>? = null
 
 	init {
+		positionTopBar()
+
 		itemListWidget.x = x + AbstractItemList.PADDING
 		itemListWidget.y = y
-		itemListWidget.width = width
+		itemListWidget.width = width - AbstractItemList.PADDING
 		itemListWidget.height = height
+		itemListWidget.positioningCallback = { McClient.runOrNextTick { positionTopBar() } }
+
 		filterButton.message = Component.literal("F")
 		searchBox.setHint(Component.literal("Search..."))
 		searchBox.setResponder(::searchAsync)
+	}
+
+	fun positionTopBar() {
+		val leftPadding = AbstractItemList.PADDING + itemListWidget.horizontalPadding
+		val contentWidth = leftPadding + itemListWidget.horizontalPadding + 2 * prevPageButton.width
+		topLayout = LinearLayout.horizontal()
+		topLayout.setPosition(x + leftPadding, y + 5)
+		topLayout.addChild(prevPageButton) { it.alignHorizontallyLeft() }
+		topLayout.addChild(SpacerElement.width(width - contentWidth))
+		topLayout.addChild(nextPageButton) { it.alignHorizontallyRight() }
+		topLayout.arrangeElements()
 	}
 
 	fun createFilterTooltip(category: SkyBlockItemCategory): Tooltip {

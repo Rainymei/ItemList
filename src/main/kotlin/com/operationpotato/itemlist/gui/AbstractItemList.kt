@@ -34,6 +34,7 @@ abstract class AbstractItemList(width: Int, height: Int) :
 	var maxPages: Int = 1
 
 	var sortingFuture: Future<*>? = null
+	var positioningCallback: Runnable? = null
 
 	init {
 		updatePositionsAsync()
@@ -66,7 +67,8 @@ abstract class AbstractItemList(width: Int, height: Int) :
 			visibleCols != previouslyVisibleCols || visibleRows != previouslyVisibleRows ||
 			itemCount != prevItemCount
 		) {
-			positionDisplays(visibleCols - 1, visibleRows, scaledSize)
+			positionDisplays(visibleCols, visibleRows, scaledSize)
+			positioningCallback?.run()
 		}
 		layout.switchPage(currentPage - 1)
 	}
