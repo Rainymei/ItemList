@@ -1,13 +1,14 @@
 package com.operationpotato.itemlist.gui
 
 import com.operationpotato.itemlist.api.impl.PluginManager
+import com.operationpotato.itemlist.utils.Utils.overlaps
 import net.minecraft.client.gui.components.AbstractWidget
 import net.minecraft.client.gui.layouts.GridLayout
 import net.minecraft.client.gui.layouts.Layout
 import net.minecraft.client.gui.layouts.LayoutElement
 import net.minecraft.client.gui.layouts.LayoutSettings
 import net.minecraft.client.gui.layouts.SpacerElement
-import net.minecraft.client.gui.navigation.ScreenRectangle
+import net.minecraft.client.renderer.Rect2i
 import java.util.function.Consumer
 
 class PaginatedGridLayout(private var x: Int, private var y: Int) : Layout {
@@ -22,19 +23,20 @@ class PaginatedGridLayout(private var x: Int, private var y: Int) : Layout {
 	private val gridLayouts = mutableListOf<MarkedGridLayout>()
 
 	fun calcExcludedAreas(startX: Int, startY: Int, maxCols: Int, maxRows: Int, itemSize: Int): List<Pair<Int, Int>> {
-		val screenRect = ScreenRectangle(x, y, x + maxCols * itemSize, y + maxRows * itemSize)
+		val rectangle = Rect2i(x, y, x + maxCols * itemSize, y + maxRows * itemSize)
 		val activeExclusionZones = PluginManager.getExclusionZones().filter { zone ->
-			screenRect.overlaps(zone.area)
+			rectangle.overlaps(zone.area)
 		}
 		if (activeExclusionZones.isEmpty()) return listOf()
+
 		val excludedAreas = mutableListOf<Pair<Int, Int>>()
 		for (col in 0..maxCols) {
 			for (row in 0..maxRows) {
 				val x = startX + (col * itemSize)
 				val y = startY + (row * itemSize)
-				val rect = ScreenRectangle(x, y, itemSize, itemSize)
+				val gridRect = Rect2i(x, y, itemSize, itemSize)
 				for (zone in activeExclusionZones) {
-					if (zone.area.overlaps(rect)) {
+					if (zone.area.overlaps(gridRect)) {
 						excludedAreas.add(Pair(col, row))
 						break
 					}

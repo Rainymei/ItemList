@@ -1,13 +1,14 @@
 package com.operationpotato.itemlist.api
 
-import net.minecraft.client.gui.navigation.ScreenRectangle
+import net.minecraft.client.renderer.Rect2i
+
 
 data class ExclusionZone(
-	val area: ScreenRectangle
+	val area: Rect2i
 ) {
 	companion object {
 		fun create(x: Int, y: Int, w: Int, h: Int): ExclusionZone {
-			return ExclusionZone(ScreenRectangle(x, y, w, h))
+			return ExclusionZone(Rect2i(x, y, w, h))
 		}
 	}
 }
