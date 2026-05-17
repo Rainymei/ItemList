@@ -1,27 +1,31 @@
 package com.operationpotato.itemlist.api.impl
 
 import com.google.common.collect.Ordering
-import com.operationpotato.itemlist.api.ExclusionZone
 import com.operationpotato.itemlist.api.ExclusionZoneManager
 import com.operationpotato.itemlist.api.Plugin
 import net.minecraft.client.gui.screens.Screen
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.client.gui.screens.inventory.CreativeModeInventoryScreen
 import net.minecraft.client.gui.screens.inventory.EffectsInInventory
 import net.minecraft.client.gui.screens.inventory.InventoryScreen
+import net.minecraft.client.renderer.Rect2i
 import net.minecraft.world.effect.MobEffectInstance
 import tech.thatgravyboat.skyblockapi.helpers.McFont
 import tech.thatgravyboat.skyblockapi.helpers.McPlayer
-import tech.thatgravyboat.skyblockapi.helpers.McScreen
 import tech.thatgravyboat.skyblockapi.utils.extentions.right
 import tech.thatgravyboat.skyblockapi.utils.extentions.top
 
 class DefaultPlugin : Plugin {
 	override fun registerExclusionZones(exclusionZoneManager: ExclusionZoneManager) {
-		val screen = McScreen.self ?: return
-		val player = McPlayer.self ?: return
-		if (!screen.showsActiveEffects() || screen !is InventoryScreen && screen !is CreativeModeInventoryScreen) return
-		if (player.activeEffects.isEmpty()) return
-		val effectsInInventory = getEffectsInInventory(screen) ?: return
+		exclusionZoneManager.addProvider(InventoryScreen::class.java, ::provide)
+		exclusionZoneManager.addProvider(CreativeModeInventoryScreen::class.java, ::provide)
+	}
+
+	fun provide(screen: AbstractContainerScreen<*>): List<Rect2i> {
+		val player = McPlayer.self ?: return listOf()
+		if (!screen.showsActiveEffects()) return listOf()
+		if (player.activeEffects.isEmpty()) return listOf()
+		val effectsInInventory = getEffectsInInventory(screen) ?: return listOf()
 
 		val playerEffects = Ordering.natural<MobEffectInstance>().sortedCopy(player.activeEffects)
 
@@ -31,11 +35,13 @@ class DefaultPlugin : Plugin {
 		var y = screen.top
 		val step = if (player.activeEffects.size > 5) 132 / (player.activeEffects.size) else 33
 
+		val zones = mutableListOf<Rect2i>()
 		playerEffects.forEach { effect ->
 			val width = if (maxWidth == 32) maxWidth else getEffectSize(effectsInInventory, effect)
-			exclusionZoneManager.addExclusionZone(ExclusionZone.create(x, y, width, 32))
+			zones.add(Rect2i(x, y, width, 32))
 			y += step
 		}
+		return zones
 	}
 
 	fun getEffectSize(effectsInInventory: EffectsInInventory, effect: MobEffectInstance): Int {

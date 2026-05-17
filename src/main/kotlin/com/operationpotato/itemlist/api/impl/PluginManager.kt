@@ -10,7 +10,7 @@ object PluginManager {
 	private val exclusionZoneManager = ExclusionZoneManagerImpl()
 
 	fun refreshExclusionZones() {
-		exclusionZoneManager.clearExclusionZones()
+		exclusionZoneManager.calculateExclusionZones()
 		for (plugin in plugins) {
 			plugin.registerExclusionZones(exclusionZoneManager)
 		}
