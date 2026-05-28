@@ -2,6 +2,7 @@ package com.operationpotato.itemlist.gui
 
 import com.operationpotato.itemlist.Settings
 import com.operationpotato.itemlist.utils.ComponentUtils
+import com.operationpotato.itemlist.utils.SearchUtils
 import com.operationpotato.itemlist.utils.SkyBlockItemCategory
 import com.operationpotato.itemlist.utils.ThreadUtils
 import com.operationpotato.itemlist.utils.ThreadUtils.cancelAndSubmit
@@ -63,8 +64,10 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) :
 		filterButton.value = Settings.lastFilter
 		filterButton.message = Component.literal("F")
 		searchBox.value = Settings.lastSearch
+		searchBox.addFormatter(SearchUtils::highlightSearch)
 		searchBox.setHint(Component.literal("Search..."))
 		searchBox.setResponder(::searchAsync)
+		searchBox.setMaxLength(999)
 
 		if (Settings.lastFilter != SkyBlockItemCategory.ALL)
 			itemListWidget.currentFilter = filterButton.value

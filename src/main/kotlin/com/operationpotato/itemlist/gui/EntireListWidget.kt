@@ -1,5 +1,6 @@
 package com.operationpotato.itemlist.gui
 
+import com.operationpotato.itemlist.utils.SearchUtils
 import com.operationpotato.itemlist.utils.SkyBlockItemCategory
 import com.operationpotato.itemlist.utils.SkyBlockItems
 import tech.thatgravyboat.skyblockapi.utils.lazy.registryBoundLazy
@@ -20,12 +21,13 @@ class EntireListWidget(width: Int, height: Int) : AbstractItemList(width, height
 
 	fun searchChildren(search: String) {
 		val lower = search.lowercase()
-		if (search.isEmpty() || !lower.startsWith(currentSearch)) {
+		if (search.isEmpty() || SearchUtils.isDistinctSearch(currentSearch, lower)) {
 			filterChildren(currentFilter)
 		}
 		currentSearch = lower
 		if (lower.isEmpty()) return
-		visibleChildren = visibleChildren.filter { it.matchesSearch(search) }
+		val searchFilters = SearchUtils.transformSearch(lower)
+		visibleChildren = visibleChildren.filter { it.matchesSearch(searchFilters) }
 	}
 
 	override fun getItems(): List<StackDisplay> {
