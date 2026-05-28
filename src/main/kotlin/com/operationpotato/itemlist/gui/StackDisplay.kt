@@ -27,6 +27,9 @@ class StackDisplay(val lazyStack: LazyItemStack, val type: SkyBlockItemCategory)
 	var stack: ItemStack = ItemStack.EMPTY
 	var scale: Float = 1f
 
+	val stackName: String by lazy { stack.hoverName.stripped.lowercase() }
+	val loreLines: List<String> by lazy { stack.getRawLore().map { it.lowercase() } }
+
 	fun getTooltipLines(): List<Component> {
 		val tooltipStyle = if (McClient.options.advancedItemTooltips) {
 			TooltipFlag.Default.ADVANCED
@@ -68,8 +71,6 @@ class StackDisplay(val lazyStack: LazyItemStack, val type: SkyBlockItemCategory)
 
 	fun matchesSearch(searches: List<String>): Boolean {
 		if (stack.isEmpty) stack = lazyStack.create()
-		val stackName = stack.hoverName.stripped.lowercase()
-		val loreLines = stack.getRawLore().map { it.lowercase() }
 		return searches.any { stackName.contains(it) || loreLines.any { line -> line.contains(it) } }
 	}
 
