@@ -3,6 +3,7 @@ package com.operationpotato.itemlist
 import com.operationpotato.itemlist.api.impl.PluginManager
 import com.operationpotato.itemlist.gui.ItemPanel
 import net.fabricmc.api.ClientModInitializer
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenKeyboardEvents
 import net.fabricmc.fabric.api.client.screen.v1.ScreenMouseEvents
@@ -24,6 +25,7 @@ object SkyBlockItemList : ClientModInitializer {
 		Keybinds.init()
 		ScreenEvents.AFTER_INIT.addPhaseOrdering(Event.DEFAULT_PHASE, latePhase)
 		ScreenEvents.AFTER_INIT.register(latePhase, ::addItemListWidget)
+		ClientPlayConnectionEvents.JOIN.register { _, _, _ -> resetWidget() }
 	}
 
 	fun addItemListWidget(mc: Minecraft, screen: Screen, w: Int, h: Int) {
@@ -31,8 +33,12 @@ object SkyBlockItemList : ClientModInitializer {
 		if (screen is AbstractContainerScreen<*>) {
 			if (screen is InventoryScreen && mc.player?.hasInfiniteMaterials() ?: false) return
 			val width = w - screen.right
-			val itemPanel = ItemPanel(screen.right, 0, width - 2, h)
+			val itemPanel = instance ?: ItemPanel(0, 0, 0, 0)
 			instance = itemPanel
+
+			itemPanel.setPosition(screen.right, 0)
+			itemPanel.setSize(width - 2, h)
+			itemPanel.updatePosition()
 			itemPanel.visible = Settings.enabled
 			if (width < 80) itemPanel.visible = false
 
@@ -58,11 +64,14 @@ object SkyBlockItemList : ClientModInitializer {
 			beforeExtract.register(latePhase) { _, _, _, _, _ ->
 				PluginManager.refreshExclusionZones()
 			}
+
 			ScreenEvents.remove(screen).register {
-				Settings.enabled = itemPanel.visible
-				Settings.scale = itemPanel.getScale()
-				instance = null
+				itemPanel.removed()
 			}
 		}
+	}
+
+	fun resetWidget() {
+		instance = null
 	}
 }

@@ -61,23 +61,6 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) :
 	var searchFuture: Future<*>? = null
 
 	init {
-		updatePosition()
-	}
-
-	fun updatePosition() {
-		positionTopBar()
-		positionBottomBar()
-
-		itemListWidget.x = x + AbstractItemList.PADDING
-		itemListWidget.y = y
-		itemListWidget.width = width - AbstractItemList.PADDING
-		itemListWidget.positioningCallback = {
-			McClient.runOrNextTick { positionTopBar() }
-			McClient.runOrNextTick { updateSearchResult() }
-		}
-		itemListWidget.itemScale = Settings.scale
-		itemListWidget.updatePositionsAsync()
-
 		filterButton.value = Settings.lastFilter
 		filterButton.message = Component.literal("F")
 		searchBox.value = Settings.lastSearch
@@ -88,6 +71,22 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) :
 			itemListWidget.currentFilter = filterButton.value
 		if (Settings.lastSearch.isNotEmpty())
 			itemListWidget.currentSearch = searchBox.value
+	}
+
+	fun updatePosition() {
+		positionTopBar()
+		positionBottomBar()
+
+		itemListWidget.x = x + AbstractItemList.PADDING
+		itemListWidget.y = y
+		itemListWidget.width = width - AbstractItemList.PADDING
+		itemListWidget.height = height - 20
+		itemListWidget.positioningCallback = {
+			McClient.runOrNextTick { positionTopBar() }
+			McClient.runOrNextTick { updateSearchResult() }
+		}
+		itemListWidget.itemScale = Settings.scale
+		itemListWidget.updatePositionsAsync()
 	}
 
 	fun positionTopBar() {
@@ -159,8 +158,9 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) :
 		}
 	}
 
-	fun getScale(): Float {
-		return itemListWidget.itemScale
+	fun removed() {
+		Settings.enabled = visible
+		Settings.scale = itemListWidget.itemScale
 	}
 
 	override fun children(): List<GuiEventListener> {
