@@ -10,11 +10,13 @@ import net.minecraft.client.gui.screens.inventory.EffectsInInventory
 import net.minecraft.client.gui.screens.inventory.InventoryScreen
 import net.minecraft.client.renderer.Rect2i
 import net.minecraft.world.effect.MobEffectInstance
+import org.jetbrains.annotations.ApiStatus
 import tech.thatgravyboat.skyblockapi.helpers.McFont
 import tech.thatgravyboat.skyblockapi.helpers.McPlayer
 import tech.thatgravyboat.skyblockapi.utils.extentions.right
 import tech.thatgravyboat.skyblockapi.utils.extentions.top
 
+@ApiStatus.Internal
 class DefaultPlugin : Plugin {
 	override fun registerExclusionZones(exclusionZoneManager: ExclusionZoneManager) {
 		exclusionZoneManager.addProvider(InventoryScreen::class.java, ::provide)

@@ -1,6 +1,7 @@
 package com.operationpotato.itemlist.gui
 
 import com.operationpotato.itemlist.Settings
+import com.operationpotato.itemlist.api.impl.PluginManager
 import com.operationpotato.itemlist.utils.ComponentUtils
 import com.operationpotato.itemlist.utils.SearchUtils
 import com.operationpotato.itemlist.utils.SkyBlockItemCategory
@@ -30,6 +31,7 @@ import tech.thatgravyboat.skyblockapi.helpers.McFont
 import tech.thatgravyboat.skyblockapi.helpers.McScreen
 import tech.thatgravyboat.skyblockapi.utils.extentions.right
 import java.util.concurrent.Future
+import kotlin.jvm.optionals.getOrNull
 
 class ItemPanel(x: Int, y: Int, width: Int, height: Int) :
 	AbstractContainerWidget(x, y, width, height, Component.empty(), defaultSettings(0)) {
@@ -179,6 +181,12 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) :
 		if (this.searchBox.isFocused) {
 			this.searchBox.keyPressed(event)
 			return true
+		} else {
+			val mousePos = McClient.mouse
+			val child = itemListWidget.getChildAt(mousePos.first, mousePos.second).getOrNull()
+			if (child != null) println(child)
+			if (child !is StackDisplay) return false
+			if (PluginManager.provideHoveredItem(child.stack, event)) return true
 		}
 		return false
 	}
@@ -197,8 +205,7 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) :
 		if (event.isEscape) return true
 		if (!this.searchBox.isFocused) return true
 		if (screen.focused == this.searchBox) return true
-		this.searchBox.keyPressed(event)
-		return false
+		return !keyPressed(event)
 	}
 
 	override fun contentHeight(): Int {

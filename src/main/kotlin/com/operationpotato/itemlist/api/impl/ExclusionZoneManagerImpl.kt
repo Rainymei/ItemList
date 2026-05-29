@@ -5,9 +5,11 @@ import com.operationpotato.itemlist.api.ExclusionZoneManager
 import com.operationpotato.itemlist.api.ExclusionZoneProvider
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap
 import net.minecraft.client.gui.screens.Screen
+import org.jetbrains.annotations.ApiStatus
 import tech.thatgravyboat.skyblockapi.helpers.McScreen
 import java.util.*
 
+@ApiStatus.Internal
 class ExclusionZoneManagerImpl : ExclusionZoneManager {
 	private var providers: Object2ObjectOpenHashMap<ExclusionZoneProvider<Screen?>, Class<Screen?>> = Object2ObjectOpenHashMap()
 
