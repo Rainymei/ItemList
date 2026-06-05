@@ -20,3 +20,4 @@ fabric-language-kotlin = { module = "net.fabricmc:fabric-language-kotlin", versi
 [plugins]
 fabric-loom = { id = "net.fabricmc.fabric-loom", version.ref = "fabric-loom" }
 kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+publish = { id = "maven-publish" }

@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
 	alias(libs.plugins.fabric.loom)
 	alias(libs.plugins.kotlin)
+	alias(libs.plugins.publish)
 }
 
 version = providers.gradleProperty("mod_version").get()
@@ -97,4 +98,50 @@ java {
 
 	sourceCompatibility = JavaVersion.VERSION_25
 	targetCompatibility = JavaVersion.VERSION_25
+}
+
+tasks.register<Jar>("apiJar") {
+	description = "Assembles a jar with only API classes"
+	archiveClassifier.set("api")
+	from(sourceSets.main.get().output) {
+		include("com/operationpotato/itemlist/api/**")
+	}
+}
+
+tasks.register<Jar>("apiSourcesJar") {
+	description = "Assembles a jar with only API sources"
+	archiveClassifier.set("api-sources")
+	from(sourceSets.main.get().allSource) {
+		include("com/operationpotato/itemlist/api/**")
+	}
+}
+
+tasks.named("assemble") {
+	dependsOn("apiJar", "apiSourcesJar")
+}
+
+publishing {
+	repositories {
+		maven {
+			name = "GitHubPackages"
+			url = uri("https://maven.pkg.github.com/OperationPotato/ItemList")
+			credentials {
+				username = System.getenv("MAVEN_USER")
+				password = System.getenv("MAVEN_TOKEN")
+			}
+		}
+	}
+	publications {
+		register<MavenPublication>("gpr") {
+			pom {
+				name.set("ItemList-API")
+				url.set("https://github.com/OperationPotato/ItemList")
+				if (System.getenv("IS_FULL_RELEASE") != "true") {
+					version += "-SNAPSHOT"
+				}
+			}
+			artifact(tasks.named("apiJar"))
+			artifact(tasks.named("apiSourcesJar"))
+		}
+	}
 }
