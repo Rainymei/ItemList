@@ -121,10 +121,11 @@ tasks.named("assemble") {
 }
 
 publishing {
+	val isFullRelease = System.getenv("IS_FULL_RELEASE") == "true"
 	repositories {
 		maven {
-			name = "GitHubPackages"
-			url = uri("https://maven.pkg.github.com/OperationPotato/ItemList")
+			val repo = if (isFullRelease) "releases" else "snapshots"
+			url = uri("https://maven.operationpotato.com/$repo")
 			credentials {
 				username = System.getenv("MAVEN_USER")
 				password = System.getenv("MAVEN_TOKEN")
@@ -132,11 +133,11 @@ publishing {
 		}
 	}
 	publications {
-		register<MavenPublication>("gpr") {
+		register<MavenPublication>("api") {
 			pom {
 				name.set("ItemList-API")
 				url.set("https://github.com/OperationPotato/ItemList")
-				if (System.getenv("IS_FULL_RELEASE") != "true") {
+				if (!isFullRelease) {
 					version += "-SNAPSHOT"
 				}
 			}
