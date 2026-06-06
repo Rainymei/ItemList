@@ -36,6 +36,7 @@ abstract class AbstractItemList(width: Int, height: Int) :
 	var positioningCallback: Runnable? = null
 
 	abstract fun getItems(): List<StackDisplay>
+	abstract fun getAllItems(): List<StackDisplay>
 
 	fun updatePositionsAsync() {
 		sortingFuture = ThreadUtils.SORTING_EXECUTOR.cancelAndSubmit(sortingFuture, ::updatePositions)
@@ -76,7 +77,7 @@ abstract class AbstractItemList(width: Int, height: Int) :
 		currentPage = if (maxPages == 0) 0 else currentPage.coerceIn(1, maxPages)
 	}
 
-	open fun scaleChildren() = getItems().forEach { it.scale(itemSize) }
+	fun scaleChildren() = getAllItems().forEach { it.scale(itemSize) }
 
 	override fun contentHeight(): Int {
 		return height
