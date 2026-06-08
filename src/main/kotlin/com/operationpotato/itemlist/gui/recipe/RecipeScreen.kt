@@ -2,6 +2,7 @@ package com.operationpotato.itemlist.gui.recipe
 
 import com.operationpotato.itemlist.Keybinds
 import com.operationpotato.itemlist.SkyBlockItemList.logger
+import com.operationpotato.itemlist.api.impl.PluginManager
 import com.operationpotato.itemlist.utils.SkyBlockRecipeAPI
 import net.minecraft.client.gui.layouts.FrameLayout
 import net.minecraft.client.gui.layouts.LinearLayout
@@ -51,7 +52,10 @@ class RecipeScreen(val parent: Screen?, val recipes: List<AbstractRecipeWidget>)
 		if (child is AbstractRecipeWidget) child.visitItems {
 			if (it is IngredientDisplay && it.isHovered) stack = it.stack
 		}
-		if (stack != null && Keybinds.handleKeybind(stack, event)) return true
+		if (stack != null) {
+			if (PluginManager.provideHoveredItem(stack, event)) return true
+			if (Keybinds.handleKeybind(stack, event)) return true
+		}
 		return super.keyPressed(event)
 	}
 
