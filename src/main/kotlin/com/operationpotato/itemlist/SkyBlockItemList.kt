@@ -1,5 +1,6 @@
 package com.operationpotato.itemlist
 
+import com.mojang.logging.LogUtils
 import com.operationpotato.itemlist.api.impl.PluginManager
 import com.operationpotato.itemlist.gui.ItemPanel
 import com.operationpotato.itemlist.utils.ScaledItemRenderer
@@ -16,11 +17,14 @@ import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.client.gui.screens.inventory.InventoryScreen
 import net.minecraft.resources.Identifier
+import org.slf4j.Logger
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
+import tech.thatgravyboat.skyblockapi.helpers.McClient
 import tech.thatgravyboat.skyblockapi.utils.extentions.right
 
 object SkyBlockItemList : ClientModInitializer {
-	val latePhase = Identifier.fromNamespaceAndPath("skyblock-item-list", "late")
+	val latePhase = id("late")
+	val logger: Logger = LogUtils.getLogger()
 	var instance: ItemPanel? = null
 
 	override fun onInitializeClient() {
@@ -33,7 +37,7 @@ object SkyBlockItemList : ClientModInitializer {
 	}
 
 	fun addItemListWidget(mc: Minecraft, screen: Screen, w: Int, h: Int) {
-		if (!LocationAPI.isOnSkyBlock) return
+		if (!LocationAPI.isOnSkyBlock && !McClient.isDev) return
 		if (screen is AbstractContainerScreen<*>) {
 			if (screen is InventoryScreen && mc.player?.hasInfiniteMaterials() ?: false) return
 			val width = w - screen.right
@@ -78,4 +82,6 @@ object SkyBlockItemList : ClientModInitializer {
 	fun resetWidget() {
 		instance = null
 	}
+
+	fun id(path: String): Identifier = Identifier.fromNamespaceAndPath("skyblock-item-list", path)
 }
