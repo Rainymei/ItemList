@@ -61,7 +61,7 @@ object SkyBlockItemList : ClientModInitializer {
 			val mouseScroll = ScreenMouseEvents.allowMouseScroll(screen)
 			mouseScroll.addPhaseOrdering(Event.DEFAULT_PHASE, latePhase)
 			mouseScroll.register(latePhase) { _, x, y, scrollX, scrollY ->
-				itemPanel.mouseScrolled(x, y, scrollX, scrollY)
+				!itemPanel.mouseScrolled(x, y, scrollX, scrollY)
 			}
 			ScreenMouseEvents.allowMouseClick(screen).register { _, _ ->
 				itemPanel.focused = null
