@@ -55,7 +55,13 @@ object RepoLibUtils {
 		}
 
 		return when (id) {
-			is SkyBlockId -> id.toItem().apply { if (withStackSize) this.count = count }
+			is SkyBlockId -> id.toItem().apply {
+				if (withStackSize) {
+					val new = copy()
+					new.count = count
+					return new
+				}
+			}
 			is Currency -> id.withAmount(count)
 			else -> null
 		}
