@@ -4,7 +4,10 @@ import com.operationpotato.itemlist.Keybinds
 import com.operationpotato.itemlist.SkyBlockItemList.logger
 import com.operationpotato.itemlist.api.impl.PluginManager
 import com.operationpotato.itemlist.utils.SkyBlockRecipeAPI
+import net.minecraft.client.gui.components.AbstractContainerWidget
+import net.minecraft.client.gui.components.ScrollableLayout
 import net.minecraft.client.gui.layouts.FrameLayout
+import net.minecraft.client.gui.layouts.Layout
 import net.minecraft.client.gui.layouts.LinearLayout
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.input.KeyEvent
@@ -24,8 +27,9 @@ class RecipeScreen(val parent: Screen?, val recipes: List<AbstractRecipeWidget>)
 	override fun init() {
 		super.init()
 
-		LinearLayout.vertical().spacing(10).apply {
-			recipes.forEach { addChild(it) }
+		var layout: Layout = LinearLayout.vertical().spacing(10).apply { recipes.forEach { addChild(it) } }
+		if (recipes.size > 4) layout = ScrollableLayout(McClient.self, layout, height)
+		layout.apply {
 			arrangeElements()
 			FrameLayout.centerInRectangle(this, this@RecipeScreen.rectangle)
 		}.visitWidgets(this::addRenderableWidget)
@@ -42,12 +46,15 @@ class RecipeScreen(val parent: Screen?, val recipes: List<AbstractRecipeWidget>)
 		recipes.forEach {
 			if (it.right > right) right = it.right
 		}
+		if (recipes.size > 4) right += 10
 		return right
 	}
 
 	override fun keyPressed(event: KeyEvent): Boolean {
 		val mousePos = McClient.mouse
-		val child = getChildAt(mousePos.first, mousePos.second).getOrNull()
+		var child = getChildAt(mousePos.first, mousePos.second).getOrNull()
+		// get the real child from the scrollable layout container
+		if (child is AbstractContainerWidget) child = child.getChildAt(mousePos.first, mousePos.second).getOrNull()
 		var stack: ItemStack? = null
 		if (child is AbstractRecipeWidget) child.visitItems {
 			if (it is IngredientDisplay && it.isHovered) stack = it.stack
