@@ -83,7 +83,7 @@ class RecipeScreen(val parent: Screen?, val recipes: List<AbstractRecipeWidget>)
 				}
 			}.takeUnless { it.isEmpty() } ?: return
 
-			McClient.setScreenAsync { RecipeScreen(parent, widgets) }
+			McClient.setScreen(RecipeScreen(parent, widgets))
 		}
 	}
 }
