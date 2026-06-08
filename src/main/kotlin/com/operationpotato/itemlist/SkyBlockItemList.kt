@@ -16,6 +16,7 @@ import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.client.gui.screens.inventory.InventoryScreen
+import net.minecraft.client.input.KeyEvent
 import net.minecraft.resources.Identifier
 import org.slf4j.Logger
 import tech.thatgravyboat.skyblockapi.api.location.LocationAPI
@@ -55,6 +56,10 @@ object SkyBlockItemList : ClientModInitializer {
 			mouseScroll.addPhaseOrdering(Event.DEFAULT_PHASE, latePhase)
 			mouseScroll.register(latePhase) { _, x, y, scrollX, scrollY ->
 				itemPanel.mouseScrolled(x, y, scrollX, scrollY)
+			}
+			ScreenMouseEvents.allowMouseClick(screen).register { _, _ ->
+				itemPanel.focused = null
+				true
 			}
 			val keyPress = ScreenKeyboardEvents.allowKeyPress(screen)
 			keyPress.addPhaseOrdering(Event.DEFAULT_PHASE, latePhase)
