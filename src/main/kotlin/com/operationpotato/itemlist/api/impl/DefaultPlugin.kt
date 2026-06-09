@@ -59,6 +59,18 @@ class DefaultPlugin : Plugin {
 				}.build()
 			)
 		}
+
+		manager.addProvider { recipeObj, _ ->
+			if (recipeObj != SkyBlockItemList.favoriteInstance?.activeRecipe) return@addProvider Optional.empty()
+			Optional.of(
+				Button.builder(Text.of("x")) {
+					SkyBlockItemList.favoriteInstance?.removeRecipe()
+				}.apply {
+					tooltip(Tooltip.create(Text.of("Unpin Recipe")))
+					size(10, 10)
+				}.build()
+			)
+		}
 	}
 
 	override fun registerHoveredItems(hoveredItemManager: HoveredItemManager) {

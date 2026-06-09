@@ -2,6 +2,8 @@ package com.operationpotato.itemlist.gui.favorites
 
 import com.operationpotato.itemlist.Settings
 import com.operationpotato.itemlist.gui.AbstractItemList
+import com.operationpotato.itemlist.gui.recipe.AbstractRecipeWidget
+import com.operationpotato.itemlist.gui.recipe.RecipeScreen
 import net.minecraft.client.gui.GuiGraphicsExtractor
 import net.minecraft.client.gui.components.AbstractContainerWidget
 import net.minecraft.client.gui.components.events.GuiEventListener
@@ -10,6 +12,7 @@ import net.minecraft.client.gui.screens.Screen
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen
 import net.minecraft.client.input.KeyEvent
 import net.minecraft.network.chat.Component
+import tech.thatgravyboat.repolib.api.recipes.Recipe
 import tech.thatgravyboat.skyblockapi.helpers.McScreen
 import tech.thatgravyboat.skyblockapi.utils.extentions.right
 
@@ -17,15 +20,22 @@ class FavoritesPanel(x: Int, y: Int, width: Int, height: Int) :
 	AbstractContainerWidget(x, y, width, height, Component.empty(), defaultSettings(0)) {
 	val listWidget = FavoritesListWidget(width - AbstractItemList.PADDING, height)
 
+	var activeRecipe: Recipe<*>? = null
+	var recipeWidget: AbstractRecipeWidget? = null
+
 	fun updatePosition() {
-		listWidget.setPosition(x, y)
-		listWidget.setSize(width - 2, height - 20)
+		val recipe = recipeWidget
+		recipe?.setPosition((width - recipe.width) / 2, 5)
+
+		val listWidgetY = recipeWidget?.bottom ?: y
+		listWidget.setPosition(x, listWidgetY)
+		listWidget.setSize(width - 2, height - listWidgetY - 20)
 		listWidget.itemSize = Settings.favoritesItemSize
 		listWidget.scaleChildren()
 		listWidget.updatePositionsAsync()
 	}
 
-	override fun children(): List<GuiEventListener> = listOf(listWidget)
+	override fun children(): List<GuiEventListener> = listOfNotNull(listWidget, recipeWidget)
 
 	override fun mouseScrolled(x: Double, y: Double, scrollX: Double, scrollY: Double): Boolean {
 		return listWidget.mouseScrolled(x, y, scrollX, scrollY)
@@ -54,9 +64,22 @@ class FavoritesPanel(x: Int, y: Int, width: Int, height: Int) :
 		Settings.favoritesItemSize = listWidget.itemSize
 	}
 
+	fun setRecipe(recipe: Recipe<*>) {
+		activeRecipe = recipe
+		recipeWidget = if (recipe != recipeWidget?.recipe) RecipeScreen.getWidgetForRecipe(recipe) else null
+		updatePosition()
+	}
+
+	fun removeRecipe() {
+		activeRecipe = null
+		recipeWidget = null
+		updatePosition()
+	}
+
 	override fun contentHeight(): Int = height
 
 	override fun extractWidgetRenderState(graphics: GuiGraphicsExtractor, mouseX: Int, mouseY: Int, a: Float) {
+		recipeWidget?.extractRenderState(graphics, mouseX, mouseY, a)
 		if (listWidget.itemCount == 0) return
 		listWidget.extractRenderState(graphics, mouseX, mouseY, a)
 	}

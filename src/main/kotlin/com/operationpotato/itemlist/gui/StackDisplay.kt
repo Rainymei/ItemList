@@ -38,7 +38,7 @@ open class StackDisplay(val lazyStack: LazyItemStack, val type: SkyBlockItemCate
 		if (stack.isEmpty) stack = lazyStack.create()
 	}
 
-	fun getTooltipLines(): List<Component> {
+	open fun getTooltipLines(): List<Component> {
 		val tooltipStyle = if (McClient.options.advancedItemTooltips) {
 			TooltipFlag.Default.ADVANCED
 		} else {

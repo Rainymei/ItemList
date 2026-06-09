@@ -104,18 +104,20 @@ class RecipeScreen(val parent: Screen?, val recipes: List<AbstractRecipeWidget>)
 			}
 		}
 
+		fun getWidgetForRecipe(it: Recipe<*>): AbstractRecipeWidget? = when (it) {
+			is CraftingRecipe -> CraftingRecipeWidget(it)
+			is ForgeRecipe -> ForgeRecipeWidget(it)
+			is KatRecipe -> KatRecipeWidget(it)
+			is ShopRecipe -> ShopRecipeWidget(it)
+			else -> {
+				logger.warn("Unknown recipe ${it::class.simpleName}")
+				null
+			}
+		}
+
 		fun openRecipe(recipes: Set<Recipe<*>>, parent: Screen? = null) {
 			val widgets = recipes.mapNotNull {
-				when (it) {
-					is CraftingRecipe -> CraftingRecipeWidget(it)
-					is ForgeRecipe -> ForgeRecipeWidget(it)
-					is KatRecipe -> KatRecipeWidget(it)
-					is ShopRecipe -> ShopRecipeWidget(it)
-					else -> {
-						logger.warn("Unknown recipe ${it::class.simpleName}")
-						null
-					}
-				}
+				getWidgetForRecipe(it)
 			}.takeUnless { it.isEmpty() } ?: return
 
 			McClient.setScreen(RecipeScreen(parent, widgets))
