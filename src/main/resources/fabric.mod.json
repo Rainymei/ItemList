@@ -5,10 +5,12 @@
 	"name": "SkyBlock Item List",
 	"description": "",
 	"authors": [
-		"Alex33856"
+		"Alex33856",
+		"j10a1n15"
 	],
 	"contact": {
-		"sources": ""
+		"sources": "https://github.com/OperationPotato/ItemList",
+		"issues": "https://github.com/OperationPotato/ItemList/issues"
 	},
 	"license": "",
 	"icon": "assets/skyblock-item-list/icon.png",
