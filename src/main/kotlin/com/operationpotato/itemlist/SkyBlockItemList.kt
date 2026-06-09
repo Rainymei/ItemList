@@ -43,7 +43,7 @@ object SkyBlockItemList : ClientModInitializer {
 		if (screen is AbstractContainerScreen<*> || screen is RecipeScreen) {
 			if (screen is InventoryScreen && mc.player?.hasInfiniteMaterials() ?: false) return
 			val screenRight = when (screen) {
-				is InventoryScreen -> screen.right
+				is AbstractContainerScreen<*> -> screen.right
 				is RecipeScreen -> screen.getRight()
 				else -> w
 			}
