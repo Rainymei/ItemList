@@ -15,6 +15,9 @@ import net.minecraft.network.chat.Component
 import tech.thatgravyboat.repolib.api.recipes.Recipe
 import tech.thatgravyboat.skyblockapi.helpers.McScreen
 import tech.thatgravyboat.skyblockapi.utils.extentions.right
+import tech.thatgravyboat.skyblockapi.utils.text.Text
+import tech.thatgravyboat.skyblockapi.utils.text.Text.send
+import tech.thatgravyboat.skyblockapi.utils.text.TextColor
 
 class FavoritesPanel(x: Int, y: Int, width: Int, height: Int) :
 	AbstractContainerWidget(x, y, width, height, Component.empty(), defaultSettings(0)) {
@@ -25,8 +28,14 @@ class FavoritesPanel(x: Int, y: Int, width: Int, height: Int) :
 
 	fun updatePosition() {
 		val recipe = recipeWidget
-		recipe?.setPosition((width - recipe.width) / 2, 5)
-
+		if (recipe != null) {
+			recipe.setPosition((width - recipe.width) / 2, 5)
+			if (recipe.width > width) {
+				Text.of("Your screen is too small to pin this recipe!").withColor(TextColor.RED).send()
+				removeRecipe()
+				return
+			}
+		}
 		val listWidgetY = recipeWidget?.bottom ?: y
 		listWidget.setPosition(x, listWidgetY)
 		listWidget.setSize(width - 2, height - listWidgetY - 20)
