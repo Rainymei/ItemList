@@ -62,6 +62,13 @@ dependencies {
 			requireCapability("tech.thatgravyboat:skyblock-api-26.1")
 		}
 	}
+
+	includeImplementation(libs.keval)
+}
+
+fun DependencyHandlerScope.includeImplementation(dependencyNotation: Provider<*>) {
+	this.include(dependencyNotation)
+	this.implementation(dependencyNotation)
 }
 
 loom {
