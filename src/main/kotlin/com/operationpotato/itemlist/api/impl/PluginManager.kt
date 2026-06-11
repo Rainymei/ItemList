@@ -31,6 +31,15 @@ object PluginManager {
 		}
 	}
 
+	fun onScreenOpened(screen: Screen): String? {
+		exclusionZoneManager.onScreenOpened(screen)
+		return null
+	}
+
+	fun onScreenClosed() {
+		exclusionZoneManager.onScreenClosed()
+	}
+
 	fun refreshExclusionZones() {
 		exclusionZoneManager.calculateExclusionZones()
 	}

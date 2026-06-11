@@ -81,6 +81,8 @@ object SkyBlockItemList : ClientModInitializer {
 
 			Screens.getWidgets(screen).add(favPanel)
 
+			var modName: String? = PluginManager.onScreenOpened(screen)
+
 			val mouseScroll = ScreenMouseEvents.allowMouseScroll(screen)
 			mouseScroll.addPhaseOrdering(Event.DEFAULT_PHASE, latePhase)
 			mouseScroll.register(latePhase) { _, x, y, scrollX, scrollY ->
@@ -113,6 +115,7 @@ object SkyBlockItemList : ClientModInitializer {
 			}
 
 			ScreenEvents.remove(screen).register {
+				PluginManager.onScreenClosed()
 				favPanel.removed()
 				itemPanel.removed()
 			}
