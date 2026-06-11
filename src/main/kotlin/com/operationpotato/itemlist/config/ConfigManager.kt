@@ -23,7 +23,7 @@ object ConfigManager {
 			val json = JsonParser.parseString(Files.readString(file))
 			settings = Settings.CODEC.parse(JsonOps.INSTANCE, json).getOrThrow()
 		} catch (e: Exception) {
-			SkyBlockItemList.logger.error("Failed to load config!", e)
+			SkyBlockItemList.logger.error("[SkyBlock Item List] Failed to load config!", e)
 		}
 	}
 
@@ -34,7 +34,7 @@ object ConfigManager {
 				Files.writeString(file, it.toPrettyString())
 			}
 		} catch (e: Exception) {
-			SkyBlockItemList.logger.error("Failed to save config!", e)
+			SkyBlockItemList.logger.error("[SkyBlock Item List] Failed to save config!", e)
 		}
 	}
 }

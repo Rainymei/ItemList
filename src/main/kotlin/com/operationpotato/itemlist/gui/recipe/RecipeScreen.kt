@@ -113,7 +113,7 @@ class RecipeScreen(val parent: Screen?, val recipes: List<AbstractRecipeWidget>)
 			is KatRecipe -> KatRecipeWidget(it)
 			is ShopRecipe -> ShopRecipeWidget(it)
 			else -> {
-				logger.warn("Unknown recipe ${it::class.simpleName}")
+				logger.warn("[SkyBlock Item List] Unknown recipe ${it::class.simpleName}")
 				null
 			}
 		}

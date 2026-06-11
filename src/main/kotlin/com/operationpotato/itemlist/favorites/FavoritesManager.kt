@@ -21,7 +21,7 @@ object FavoritesManager {
 				favorites = it
 			}
 		} catch (e: Exception) {
-			SkyBlockItemList.logger.error("Failed to load favorites.", e)
+			SkyBlockItemList.logger.error("[SkyBlock Item List] Failed to load favorites.", e)
 		}
 	}
 
@@ -33,7 +33,7 @@ object FavoritesManager {
 				Files.writeString(file, it.toString())
 			}
 		} catch (e: Exception) {
-			SkyBlockItemList.logger.error("Failed to save favorites.", e)
+			SkyBlockItemList.logger.error("[SkyBlock Item List] Failed to save favorites.", e)
 		}
 	}
 
