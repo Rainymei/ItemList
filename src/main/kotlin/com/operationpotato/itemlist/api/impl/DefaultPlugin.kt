@@ -19,6 +19,7 @@ import net.minecraft.client.renderer.Rect2i
 import net.minecraft.world.effect.MobEffectInstance
 import org.jetbrains.annotations.ApiStatus
 import tech.thatgravyboat.repolib.api.recipes.Recipe
+import tech.thatgravyboat.skyblockapi.api.remote.api.SkyBlockId.Companion.getSkyBlockId
 import tech.thatgravyboat.skyblockapi.helpers.McClient
 import tech.thatgravyboat.skyblockapi.helpers.McFont
 import tech.thatgravyboat.skyblockapi.helpers.McPlayer
@@ -36,6 +37,21 @@ class DefaultPlugin : Plugin {
 	}
 
 	override fun registerRecipeButtons(manager: RecipeButtonManager) {
+		manager.addProvider { recipeObj, stack ->
+			val id = stack.getSkyBlockId()?.skyblockId
+			if ((recipeObj as? Recipe<*>)?.type() != Recipe.Type.CRAFTING || id == null) {
+				return@addProvider Optional.empty()
+			}
+			Optional.of(
+				Button.builder(Text.of("o")) { button ->
+					if (button.active) McClient.sendCommand("viewrecipe $id")
+				}.apply {
+					tooltip(Tooltip.create(Text.of("Show SkyBlock Craft")))
+					size(10, 10)
+				}.build()
+			)
+		}
+
 		manager.addProvider { recipeObj, _ ->
 			val recipe = recipeObj as? Recipe<*> ?: return@addProvider Optional.empty()
 			val isFav = FavoritesManager.isFavoriteRecipe(recipe)
