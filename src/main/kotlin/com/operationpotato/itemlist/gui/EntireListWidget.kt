@@ -25,7 +25,7 @@ class EntireListWidget(width: Int, height: Int) : AbstractItemList(width, height
 
 	fun searchChildren(search: String) {
 		val lower = search.lowercase()
-		if (search.isEmpty() || SearchUtils.isDistinctSearch(currentSearch, lower)) {
+		if (search.isEmpty() || SearchUtils.isDistinctSearch(currentSearch, lower) || visibleChildren.isEmpty()) {
 			filterChildren(currentFilter)
 		}
 		currentSearch = lower
@@ -34,10 +34,7 @@ class EntireListWidget(width: Int, height: Int) : AbstractItemList(width, height
 		visibleChildren = visibleChildren.filter { it.matchesSearch(searchFilters) }
 	}
 
-	override fun getItems(): List<StackDisplay> {
-		if (visibleChildren.isEmpty()) searchChildren(currentSearch)
-		return visibleChildren
-	}
+	override fun getItems(): List<StackDisplay> = visibleChildren
 	override fun getAllItems(): List<StackDisplay> = children
 
 	companion object {
