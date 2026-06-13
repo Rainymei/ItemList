@@ -79,6 +79,11 @@ abstract class AbstractRecipeWidget(val recipe: Recipe<*>, width: Int, height: I
 	}
 
 	override fun keyPressed(event: KeyEvent): Boolean {
+		var handled = false
+		container.visitWidgets { widget ->
+			if (widget.isHovered && widget.keyPressed(event)) handled = true
+		}
+		if (handled) return true
 		if (Keybinds.favoriteItem.matches(event)) {
 			if (FavoritesManager.isFavoriteRecipe(recipe)) {
 				FavoritesManager.removeFavoriteRecipe(recipe)
@@ -87,11 +92,7 @@ abstract class AbstractRecipeWidget(val recipe: Recipe<*>, width: Int, height: I
 			}
 			return true
 		}
-		var handled = false
-		container.visitWidgets { widget ->
-			if (widget.isHovered && widget.keyPressed(event)) handled = true
-		}
-		return handled
+		return false
 	}
 
 	override fun updateWidgetNarration(output: NarrationElementOutput) {}
