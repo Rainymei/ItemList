@@ -57,7 +57,7 @@ class PaginatedGridLayout(private var x: Int, private var y: Int) : Layout {
 		var row = 0
 		excludedAreas = calcExcludedAreas(x, y, maxCols, maxRows, itemSize)
 		val maxArea = (maxCols + 1) * (maxRows + 1)
-		if (maxArea - excludedAreas.size < 0) return
+		if (maxArea - excludedAreas.size <= 0) return
 		val iterator = children.iterator()
 		while (iterator.hasNext()) {
 			if (excludedAreas.contains(Pair(col, row))) {

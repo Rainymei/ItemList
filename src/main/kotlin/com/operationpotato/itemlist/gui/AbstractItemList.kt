@@ -107,7 +107,8 @@ abstract class AbstractItemList(width: Int, height: Int) :
 				currentPage += maxPages
 			}
 		}
-		currentPage = currentPage.coerceIn(1, maxPages)
+		currentPage = if (maxPages == 0) 0
+		else currentPage.coerceIn(1, maxPages)
 		layout.switchPage(currentPage - 1)
 	}
 
