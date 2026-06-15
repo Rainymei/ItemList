@@ -1,6 +1,7 @@
 package com.operationpotato.itemlist.gui.recipe
 
 import com.operationpotato.itemlist.Keybinds
+import com.operationpotato.itemlist.favorites.FavoritesManager
 import com.operationpotato.itemlist.SkyBlockItemList.logger
 import com.operationpotato.itemlist.api.impl.PluginManager
 import com.operationpotato.itemlist.utils.SkyBlockRecipeAPI
@@ -122,9 +123,10 @@ class RecipeScreen(val parent: Screen?, val recipes: List<AbstractRecipeWidget>)
 		}
 
 		fun openRecipe(recipes: Set<Recipe<*>>, parent: Screen? = null) {
-			val widgets = recipes.mapNotNull {
-				getWidgetForRecipe(it)
-			}.takeUnless { it.isEmpty() } ?: return
+			val widgets = recipes
+				.sortedByDescending { FavoritesManager.isFavoriteRecipe(it) }
+				.mapNotNull { getWidgetForRecipe(it) }
+				.takeUnless { it.isEmpty() } ?: return
 
 			McClient.setScreen(RecipeScreen(parent, widgets))
 		}
