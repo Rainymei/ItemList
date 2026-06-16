@@ -1,6 +1,7 @@
 package com.operationpotato.itemlist.gui
 
 import com.operationpotato.itemlist.config.ConfigManager
+import com.operationpotato.itemlist.gui.config.ConfigScreen
 import com.operationpotato.itemlist.utils.CalcUtils
 import com.operationpotato.itemlist.utils.CalcUtils.isExpression
 import com.operationpotato.itemlist.utils.ComponentUtils
@@ -45,6 +46,11 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) : AbstractItemPanel(x, 
 	}, false)
 	var topLayout: LinearLayout = LinearLayout.horizontal()
 
+	val settingsButton: Button = Button.builder(Component.literal("⚙")) {
+		McClient.setScreen(ConfigScreen.createScreen(McScreen.self))
+	}.apply {
+		size(16, 16)
+	}.build()
 	val filterButton: CycleButton<SkyBlockItemCategory> =
 		CycleButton.builder(SkyBlockItemCategory::asComponent, SkyBlockItemCategory.ALL)
 			.withValues(SkyBlockItemCategory.entries)
@@ -55,7 +61,7 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) : AbstractItemPanel(x, 
 	)
 	var bottomLayout: LinearLayout = LinearLayout.horizontal()
 
-	val children: List<AbstractWidget> = listOf(nextPageButton, prevPageButton, filterButton, searchBox, itemListWidget)
+	val children: List<AbstractWidget> = listOf(nextPageButton, prevPageButton, filterButton, searchBox, settingsButton, itemListWidget)
 
 	var filterFuture: Future<*>? = null
 	var searchFuture: Future<*>? = null
@@ -64,9 +70,9 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) : AbstractItemPanel(x, 
 	private var calculatorResultColor: Int = 0
 
 	init {
-		filterButton.value = ConfigManager.get().lastFilter
+		filterButton.value = ConfigManager.get().mainList.lastFilter
 		filterButton.message = Component.literal("F")
-		if (ConfigManager.get().lastFilter != SkyBlockItemCategory.ALL)
+		if (ConfigManager.get().mainList.lastFilter != SkyBlockItemCategory.ALL)
 			itemListWidget.currentFilter = filterButton.value
 
 		searchBox.addFormatter(SearchUtils::highlightSearch)
@@ -79,11 +85,11 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) : AbstractItemPanel(x, 
 			else searchAsync(text)
 		}
 		searchBox.setMaxLength(999)
-		searchBox.value = ConfigManager.get().lastSearch
+		searchBox.value = ConfigManager.get().mainList.lastSearch
 	}
 
 	fun updateListVisibility(search: String, isExpression: Boolean) {
-		itemListWidget.visible = !ConfigManager.get().hideItemsWithoutSearch || (search.isNotEmpty() && !isExpression)
+		itemListWidget.visible = !ConfigManager.get().mainList.hideItemsWithoutSearch || (search.isNotEmpty() && !isExpression)
 		// top bar layout might not be initialized yet, so:
 		prevPageButton.visible = itemListWidget.visible
 		nextPageButton.visible = itemListWidget.visible
@@ -99,7 +105,7 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) : AbstractItemPanel(x, 
 			McClient.runOrNextTick { positionTopBar() }
 			McClient.runOrNextTick { updateSearchResult() }
 		}
-		itemListWidget.itemSize = ConfigManager.get().itemSize
+		itemListWidget.itemSize = ConfigManager.get().mainList.itemSize
 		itemListWidget.scaleChildren()
 		itemListWidget.updatePositionsAsync()
 	}
@@ -117,13 +123,14 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) : AbstractItemPanel(x, 
 
 	fun positionBottomBar() {
 		filterButton.setSize(16, 16)
-		searchBox.width = width - 26 - filterButton.width
+		searchBox.width = width - 10 - filterButton.width * 3
 
 		bottomLayout = LinearLayout.horizontal()
 		bottomLayout.defaultCellSetting().paddingRight(4)
-		bottomLayout.setPosition(x + 20 + itemListWidget.horizontalPadding, y + height - 20)
+		bottomLayout.setPosition(x + 15 + itemListWidget.horizontalPadding, y + height - 20)
 		bottomLayout.addChild(searchBox)
 		bottomLayout.addChild(filterButton)
+		bottomLayout.addChild(settingsButton)
 		bottomLayout.arrangeElements()
 	}
 
@@ -135,7 +142,7 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) : AbstractItemPanel(x, 
 	}
 
 	fun onFilterButtonClick(btn: CycleButton<SkyBlockItemCategory>, category: SkyBlockItemCategory) {
-		ConfigManager.get().lastFilter = category
+		ConfigManager.get().mainList.lastFilter = category
 		val color = if (category == SkyBlockItemCategory.ALL) {
 			ChatFormatting.WHITE
 		} else {
@@ -148,7 +155,7 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) : AbstractItemPanel(x, 
 	fun filterAsync(category: SkyBlockItemCategory) {
 		this.filterFuture = ThreadUtils.SORTING_EXECUTOR.cancelAndSubmit(filterFuture) {
 			itemListWidget.filterChildren(category)
-			itemListWidget.searchChildren(ConfigManager.get().lastSearch)
+			itemListWidget.searchChildren(ConfigManager.get().mainList.lastSearch)
 			itemListWidget.switchPage(0)
 			itemListWidget.updatePositionsAsync()
 		}
@@ -163,7 +170,7 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) : AbstractItemPanel(x, 
 	}
 
 	fun searchAsync(text: String) {
-		ConfigManager.get().lastSearch = text
+		ConfigManager.get().mainList.lastSearch = text
 		calculatorResult = "" to false
 		this.searchFuture = ThreadUtils.SORTING_EXECUTOR.cancelAndSubmit(searchFuture) {
 			itemListWidget.searchChildren(filterByTextCategory(text))
@@ -207,7 +214,7 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) : AbstractItemPanel(x, 
 	}
 
 	override fun removed() {
-		ConfigManager.get().itemSize = itemListWidget.itemSize
+		ConfigManager.get().mainList.itemSize = itemListWidget.itemSize
 	}
 
 	override fun children(): List<GuiEventListener> = children
@@ -226,7 +233,7 @@ class ItemPanel(x: Int, y: Int, width: Int, height: Int) : AbstractItemPanel(x, 
 		val screen = McScreen.self
 		if (screen !is AbstractContainerScreen<*>) return
 		val availableWidth = screen.width - screen.right
-		val panelWidth = (availableWidth * ConfigManager.get().maxWidth).toInt()
+		val panelWidth = (availableWidth * ConfigManager.get().general.maxWidth).toInt()
 		x = screen.width - panelWidth
 		width = panelWidth - 2
 		updatePosition()
