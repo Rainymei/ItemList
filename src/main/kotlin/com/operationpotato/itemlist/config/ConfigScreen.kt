@@ -1,8 +1,7 @@
-package com.operationpotato.itemlist.gui.config
+package com.operationpotato.itemlist.config
 
 import com.moulberry.lattice.Lattice
 import com.moulberry.lattice.element.LatticeElements
-import com.operationpotato.itemlist.config.ConfigManager
 import net.minecraft.client.gui.screens.Screen
 import net.minecraft.network.chat.Component
 

@@ -22,6 +22,12 @@
 				"adapter": "kotlin"
 			}
 		],
+		"modmenu": [
+			{
+				"value": "com.operationpotato.itemlist.compat.ModMenuCompatibility",
+				"adapter": "kotlin"
+			}
+		],
 		"skyblock-item-list": [
 			{
 				"value": "com.operationpotato.itemlist.api.impl.DefaultPlugin",

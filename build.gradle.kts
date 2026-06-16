@@ -43,6 +43,14 @@ repositories {
 			includeGroup("net.hypixel")
 		}
 	}
+	exclusiveContent {
+		forRepository {
+			maven("https://maven.terraformersmc.com/releases")
+		}
+		filter {
+			includeGroup("com.terraformersmc")
+		}
+	}
 }
 
 dependencies {
@@ -65,6 +73,8 @@ dependencies {
 
 	includeImplementation(libs.keval)
 	includeImplementation(libs.lattice)
+
+	compileOnly(libs.modmenu)
 }
 
 fun DependencyHandlerScope.includeImplementation(dependencyNotation: Provider<*>) {
