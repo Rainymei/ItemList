@@ -21,6 +21,7 @@ import tech.thatgravyboat.repolib.api.recipes.Recipe
 import tech.thatgravyboat.repolib.api.recipes.ShopRecipe
 import tech.thatgravyboat.skyblockapi.api.remote.api.SkyBlockId.Companion.getSkyBlockId
 import tech.thatgravyboat.skyblockapi.helpers.McClient
+import tech.thatgravyboat.skyblockapi.utils.extentions.cleanName
 import tech.thatgravyboat.skyblockapi.utils.text.Text
 import tech.thatgravyboat.skyblockapi.utils.text.Text.send
 import tech.thatgravyboat.skyblockapi.utils.text.TextBuilder.append
@@ -106,7 +107,8 @@ class RecipeScreen(val parent: Screen?, val recipes: List<AbstractRecipeWidget>)
 			} else {
 				Text.of("No recipes found for ") {
 					color = TextColor.RED
-					append(targetId.skyblockId, TextColor.LIGHT_PURPLE)
+					append(stack.cleanName, TextColor.LIGHT_PURPLE)
+					append("!")
 				}.send()
 			}
 		}
@@ -120,7 +122,8 @@ class RecipeScreen(val parent: Screen?, val recipes: List<AbstractRecipeWidget>)
 			} else {
 				Text.of("No usages found for ") {
 					color = TextColor.RED
-					append(targetId.skyblockId, TextColor.LIGHT_PURPLE)
+					append(stack.cleanName, TextColor.LIGHT_PURPLE)
+					append("!")
 				}.send()
 			}
 		}
