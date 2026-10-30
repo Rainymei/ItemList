@@ -24,7 +24,12 @@ import tech.thatgravyboat.skyblockapi.helpers.McPlayer
 import tech.thatgravyboat.skyblockapi.platform.pushPop
 import tech.thatgravyboat.skyblockapi.platform.translate
 
-class IngredientDisplay(val stack: ItemStack, val showStackSize: Boolean = true) :
+class IngredientDisplay(
+	val stack: ItemStack,
+	val showStackSize: Boolean = true,
+	private val clickOverride: ((MouseButtonEvent) -> Boolean)? = null,
+	private val extraTooltip: List<Component> = emptyList(),
+) :
 	AbstractWidget(0, 0, STACK_SIZE, STACK_SIZE, Component.empty()) {
 
 	fun getTooltipLines(): List<Component> {
@@ -33,7 +38,7 @@ class IngredientDisplay(val stack: ItemStack, val showStackSize: Boolean = true)
 		} else {
 			TooltipFlag.Default.NORMAL
 		}
-		return stack.getTooltipLines(Item.TooltipContext.of(McLevel.self), McPlayer.self, tooltipStyle)
+		return stack.getTooltipLines(Item.TooltipContext.of(McLevel.self), McPlayer.self, tooltipStyle) + extraTooltip
 	}
 
 	override fun extractWidgetRenderState(
@@ -73,6 +78,7 @@ class IngredientDisplay(val stack: ItemStack, val showStackSize: Boolean = true)
 	}
 
 	override fun onClick(event: MouseButtonEvent, doubleClick: Boolean) {
+		if (clickOverride?.invoke(event) == true) return
 		ItemClickAction.handleClick(event, stack)
 	}
 
